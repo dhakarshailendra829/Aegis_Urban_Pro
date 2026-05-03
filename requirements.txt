@@ -4,5 +4,3 @@ pillow
 matplotlib
 scikit-learn
 tensorflow==2.15.0
-runtime.txt
-python-3.10

@@ -17,11 +17,14 @@ st.set_page_config(
 )
 
 # =========================
-# LOAD CSS
+# CSS
 # =========================
 def load_css():
-    with open("style.css", "r") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    try:
+        with open("style.css", "r") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except:
+        pass
 
 load_css()
 
@@ -40,9 +43,6 @@ st.sidebar.metric("System", "AERIS v2.0")
 st.sidebar.metric("AI Mode", "Unsupervised VAE")
 st.sidebar.metric("Input", "128x128 RGB")
 st.sidebar.success("Status: ONLINE 🟢")
-
-st.sidebar.markdown("---")
-st.sidebar.info("Upload satellite image for AI analysis")
 
 # =========================
 # MODEL
@@ -69,34 +69,19 @@ def build_encoder():
     return tf.keras.Model(inp, [z_mean, z_log_var, z])
 
 
-def build_decoder():
-    inp = tf.keras.Input(shape=(LATENT_DIM,))
-
-    x = tf.keras.layers.Dense(32 * 32 * 128, activation="relu")(inp)
-    x = tf.keras.layers.Reshape((32, 32, 128))(x)
-
-    x = tf.keras.layers.Conv2DTranspose(128, 3, 2, padding="same", activation="relu")(x)
-    x = tf.keras.layers.Conv2DTranspose(64, 3, 2, padding="same", activation="relu")(x)
-    x = tf.keras.layers.Conv2DTranspose(3, 3, padding="same", activation="sigmoid")(x)
-
-    return tf.keras.Model(inp, x)
-
-
 @st.cache_resource
 def load_models():
     encoder = build_encoder()
-    decoder = build_decoder()
 
     encoder.load_weights("saved_models/advanced_urban_encoder.h5")
-    decoder.load_weights("saved_models/advanced_urban_decoder.h5")
 
-    return encoder, decoder
+    return encoder
 
 
-encoder, decoder = load_models()
+encoder = load_models()
 
 # =========================
-# PROCESSING (cv2 removed → PIL used)
+# PROCESSING (NO cv2 FIXED)
 # =========================
 def preprocess(img):
     img = Image.fromarray(img).resize((IMG_SIZE, IMG_SIZE))
@@ -113,7 +98,6 @@ def generate_mask(img):
 
     latent_map = latent[:size * size].reshape(size, size)
 
-    # PIL resize instead of cv2
     latent_map = np.array(
         Image.fromarray(latent_map).resize((IMG_SIZE, IMG_SIZE))
     )
@@ -141,41 +125,23 @@ if uploaded_file:
         col1, col2 = st.columns(2)
 
         with col1:
-            st.subheader("Original Image")
-            st.image(image)
+            st.image(image, caption="Original Image")
 
         with col2:
-            st.subheader("AI Segmentation Mask")
-            st.image(mask * 255)
+            st.image(mask * 255, caption="AI Segmentation Mask")
 
     with tab2:
-        st.subheader("Latent Space Energy Map")
-
         fig, ax = plt.subplots()
         ax.imshow(latent_map, cmap="jet")
-        ax.set_title("Latent Activation Heatmap")
         st.pyplot(fig)
 
-        st.subheader("Pixel Distribution")
-
         fig2, ax2 = plt.subplots()
-        ax2.hist(latent_map.flatten(), bins=30, color="cyan")
+        ax2.hist(latent_map.flatten(), bins=30)
         st.pyplot(fig2)
 
     with tab3:
-        st.info("""
-        🧠 AERIS AI SYSTEM
+        st.info("VAE Neural System Active")
+        st.success("Status: STABLE 🚀")
 
-        • Variational Autoencoder (VAE)
-        • Latent Feature Mapping
-        • Unsupervised Segmentation
-        • NASA Inspired Visualization Layer
-
-        ⚠ No labeled dataset required
-        """)
-
-        st.success("System Status: ACTIVE & STABLE 🚀")
-
-# FOOTER
 st.markdown("---")
-st.markdown("<div class='footer'>AERIS NASA AI • Satellite Intelligence System • VAE Neural Engine</div>", unsafe_allow_html=True)
+st.markdown("AERIS NASA AI • VAE Neural Engine")
