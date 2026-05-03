@@ -1,6 +1,5 @@
 streamlit
 numpy
-opencv-python-headless
-scikit-learn
 pillow
 matplotlib
+scikit-learn
