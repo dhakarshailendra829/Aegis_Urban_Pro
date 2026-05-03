@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import tensorflow as tf
+
 # =========================
 # CONFIG
 # =========================
@@ -95,11 +96,11 @@ def load_models():
 encoder, decoder = load_models()
 
 # =========================
-# PROCESSING
+# PROCESSING (cv2 removed → PIL used)
 # =========================
 def preprocess(img):
-    img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
-    img = img / 255.0
+    img = Image.fromarray(img).resize((IMG_SIZE, IMG_SIZE))
+    img = np.array(img) / 255.0
     return np.expand_dims(img.astype(np.float32), axis=0)
 
 
@@ -111,12 +112,15 @@ def generate_mask(img):
     size = max(4, size)
 
     latent_map = latent[:size * size].reshape(size, size)
-    latent_map = cv2.resize(latent_map, (IMG_SIZE, IMG_SIZE))
+
+    # PIL resize instead of cv2
+    latent_map = np.array(
+        Image.fromarray(latent_map).resize((IMG_SIZE, IMG_SIZE))
+    )
 
     latent_map = (latent_map - latent_map.min()) / (latent_map.max() + 1e-7)
 
     return latent_map, (latent_map > 0.5).astype(np.uint8)
-
 
 # =========================
 # UPLOAD
@@ -131,14 +135,8 @@ if uploaded_file:
     processed = preprocess(image)
     latent_map, mask = generate_mask(processed)
 
-    # =========================
-    # TABS
-    # =========================
     tab1, tab2, tab3 = st.tabs(["🛰 Analysis", "📊 AI Insights", "ℹ System Info"])
 
-    # =========================
-    # TAB 1
-    # =========================
     with tab1:
         col1, col2 = st.columns(2)
 
@@ -150,9 +148,6 @@ if uploaded_file:
             st.subheader("AI Segmentation Mask")
             st.image(mask * 255)
 
-    # =========================
-    # TAB 2 - GRAPHS
-    # =========================
     with tab2:
         st.subheader("Latent Space Energy Map")
 
@@ -167,9 +162,6 @@ if uploaded_file:
         ax2.hist(latent_map.flatten(), bins=30, color="cyan")
         st.pyplot(fig2)
 
-    # =========================
-    # TAB 3
-    # =========================
     with tab3:
         st.info("""
         🧠 AERIS AI SYSTEM
@@ -184,8 +176,6 @@ if uploaded_file:
 
         st.success("System Status: ACTIVE & STABLE 🚀")
 
-# =========================
 # FOOTER
-# =========================
 st.markdown("---")
 st.markdown("<div class='footer'>AERIS NASA AI • Satellite Intelligence System • VAE Neural Engine</div>", unsafe_allow_html=True)
