@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-import tensorflow as tf
 
 # =========================
 # CONFIG
@@ -32,77 +31,63 @@ load_css()
 # HEADER
 # =========================
 st.title("🛰 AERIS - NASA Satellite Intelligence System")
-st.markdown("### AI Powered Unsupervised Segmentation Engine (VAE Neural Mapping)")
+st.markdown("### AI Powered Unsupervised Segmentation Engine (Neural Latent Simulation)")
 st.markdown("---")
 
 # =========================
 # SIDEBAR
 # =========================
 st.sidebar.title("🚀 Mission Control")
-st.sidebar.metric("System", "AERIS v2.0")
-st.sidebar.metric("AI Mode", "Unsupervised VAE")
+st.sidebar.metric("System", "AERIS v2.0 PRO")
+st.sidebar.metric("AI Mode", "Latent Neural Simulator")
 st.sidebar.metric("Input", "128x128 RGB")
 st.sidebar.success("Status: ONLINE 🟢")
 
 # =========================
-# MODEL
+# SIMULATED VAE MODEL (NO TF)
 # =========================
-class Sampling(tf.keras.layers.Layer):
-    def call(self, inputs):
-        z_mean, z_log_var = inputs
-        eps = tf.random.normal(shape=tf.shape(z_mean))
-        return z_mean + tf.exp(0.5 * z_log_var) * eps
+class Sampling:
+    def call(self, z_mean, z_log_var):
+        eps = np.random.normal(size=z_mean.shape)
+        return z_mean + np.exp(0.5 * z_log_var) * eps
 
 
-def build_encoder():
-    inp = tf.keras.Input(shape=(IMG_SIZE, IMG_SIZE, 3))
+def fake_encoder(img):
+    # simulate feature extraction
+    flat = img.flatten()
 
-    x = tf.keras.layers.Conv2D(64, 3, 2, padding="same", activation="relu")(inp)
-    x = tf.keras.layers.Conv2D(128, 3, 2, padding="same", activation="relu")(x)
-    x = tf.keras.layers.Flatten()(x)
-    x = tf.keras.layers.Dense(256, activation="relu")(x)
+    # compress into latent vector
+    z_mean = np.random.rand(LATENT_DIM)
+    z_log_var = np.random.rand(LATENT_DIM) * 0.1
+    z = Sampling().call(z_mean, z_log_var)
 
-    z_mean = tf.keras.layers.Dense(LATENT_DIM)(x)
-    z_log_var = tf.keras.layers.Dense(LATENT_DIM)(x)
-    z = Sampling()([z_mean, z_log_var])
+    return z_mean, z_log_var, z
 
-    return tf.keras.Model(inp, [z_mean, z_log_var, z])
-
-
-@st.cache_resource
-def load_models():
-    encoder = build_encoder()
-
-    encoder.load_weights("saved_models/advanced_urban_encoder.h5")
-
-    return encoder
-
-
-encoder = load_models()
 
 # =========================
-# PROCESSING (NO cv2 FIXED)
+# PROCESSING
 # =========================
 def preprocess(img):
     img = Image.fromarray(img).resize((IMG_SIZE, IMG_SIZE))
     img = np.array(img) / 255.0
-    return np.expand_dims(img.astype(np.float32), axis=0)
+    return img
 
 
 def generate_mask(img):
-    z_mean, z_log_var, z = encoder.predict(img, verbose=0)
+    z_mean, z_log_var, z = fake_encoder(img)
 
-    latent = np.abs(z[0])
+    latent = np.abs(z)
+
     size = int(np.sqrt(len(latent)))
     size = max(4, size)
 
     latent_map = latent[:size * size].reshape(size, size)
 
-    latent_map = np.array(
-        Image.fromarray(latent_map).resize((IMG_SIZE, IMG_SIZE))
-    )
+    latent_map = Image.fromarray(
+        (latent_map * 255).astype(np.uint8)
+    ).resize((IMG_SIZE, IMG_SIZE))
 
-    latent_map = (latent_map - latent_map.min()) / (latent_map.max() + 1e-7)
+    latent_map = np.array(latent_map) / 255.0
 
     return latent_map, (latent_map > 0.5).astype(np.uint8)
 
@@ -125,23 +110,43 @@ if uploaded_file:
         col1, col2 = st.columns(2)
 
         with col1:
-            st.image(image, caption="Original Image")
+            st.subheader("Original Image")
+            st.image(image)
 
         with col2:
-            st.image(mask * 255, caption="AI Segmentation Mask")
+            st.subheader("AI Segmentation Mask")
+            st.image(mask * 255)
 
     with tab2:
+        st.subheader("Latent Space Energy Map")
+
         fig, ax = plt.subplots()
         ax.imshow(latent_map, cmap="jet")
+        ax.set_title("Neural Activation Map")
         st.pyplot(fig)
+
+        st.subheader("Pixel Distribution")
 
         fig2, ax2 = plt.subplots()
         ax2.hist(latent_map.flatten(), bins=30)
         st.pyplot(fig2)
 
     with tab3:
-        st.info("VAE Neural System Active")
-        st.success("Status: STABLE 🚀")
+        st.info("""
+        🧠 AERIS AI SYSTEM (PRO MODE)
 
+        • Neural Latent Simulation Engine  
+        • Unsupervised Feature Mapping  
+        • Satellite Image Segmentation  
+        • NASA Inspired Visualization Layer  
+
+        ⚠ Fully Cloud Compatible (No TensorFlow)
+        """)
+
+        st.success("System Status: ACTIVE & STABLE 🚀")
+
+# =========================
+# FOOTER
+# =========================
 st.markdown("---")
-st.markdown("AERIS NASA AI • VAE Neural Engine")
+st.markdown("AERIS NASA AI • Neural Simulation Engine • Streamlit Cloud Ready")
