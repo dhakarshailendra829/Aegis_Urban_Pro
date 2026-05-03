@@ -1,0 +1,88 @@
+/* ===========================
+   AERIS NASA-STYLE UI THEME
+   =========================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap');
+
+html, body, [class*="css"]  {
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* Main background */
+.main {
+    background: radial-gradient(circle at top, #050d1a, #000814);
+    color: #ffffff;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #001d3d, #000814);
+    border-right: 1px solid #00f5ff33;
+}
+
+/* Titles */
+h1 {
+    color: #00f5ff !important;
+    text-shadow: 0px 0px 15px #00f5ff;
+    letter-spacing: 2px;
+}
+
+h2, h3 {
+    color: #7df9ff !important;
+}
+
+/* Buttons */
+.stButton>button {
+    background: linear-gradient(90deg, #00f5ff, #0066ff);
+    color: black;
+    border-radius: 10px;
+    border: none;
+    padding: 0.6rem 1rem;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.stButton>button:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 0px 15px #00f5ff;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab"] {
+    background: transparent;
+    color: #7df9ff;
+    font-weight: 600;
+}
+
+.stTabs [aria-selected="true"] {
+    color: #00f5ff !important;
+    border-bottom: 2px solid #00f5ff;
+}
+
+/* Card style */
+.block-container {
+    padding: 2rem;
+}
+
+/* Image glow */
+img {
+    border-radius: 12px;
+    box-shadow: 0px 0px 25px rgba(0,245,255,0.2);
+}
+
+/* Metrics */
+[data-testid="stMetric"] {
+    background: rgba(0, 245, 255, 0.08);
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,245,255,0.2);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    color: #7df9ff;
+    font-size: 12px;
+    margin-top: 50px;
+    opacity: 0.7;
+}

@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual env
+venv/
+.env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Large ML models
+saved_models/
+*.h5
+*.pt
+*.pth
+*.onnx
+*.pkl
+
+# Data
+data/
+datasets/
+
+# Images (optional if large)
+*.png
+*.jpg
+
+# Streamlit
+.streamlit/secrets.toml
