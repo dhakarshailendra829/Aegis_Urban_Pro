@@ -1,5 +1,11 @@
 streamlit
-numpy
-pillow
 matplotlib
 scikit-learn
+numpy
+pillow
+opencv-python-headless
+pandas
+scipy
+plotly
+folium
+streamlit-folium
